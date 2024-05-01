@@ -16,58 +16,72 @@ type SectionProps = PropsWithChildren<{
 
 function App(): React.JSX.Element {
 
-  const [expr, setExpr] = useState('');
+  const [currExpr, setcurrExpr] = useState('');
+  const [errMsg, setErrMsg] = useState('');
 
   const [rows, _] = useState([
     ['='],
     ['AC', '()', 'del', '+/-'],
     ['0', '.', '%', '+'],
-    ['1', '2', '3', '-'], 
-    ['4', '5', '6', '*'], 
+    ['1', '2', '3', '-'],
+    ['4', '5', '6', '*'],
     ['7', '8', '9', '/']
   ]);
 
   function updateCalculation(op: any) {
-    console.log(op)
-    if(op.item == 'AC') {
-      setExpr(expr => '');
-    } else if(op.item == 'del') {
-      setExpr(expr => expr.substring(0, expr.length-1));
-    } else if(op.item == '=') {
-      setExpr(expr => eval(expr));
+
+    if (op.item == 'AC') {
+      setcurrExpr(currExpr => '');
+    } else if (op.item == 'del') {
+      console.log('typeof currExpr;  ' + typeof currExpr);
+      setcurrExpr(currExpr => currExpr.substring(0, currExpr.length - 1));
+    } else if (op.item == '+/-') {
+      // Todos:
+    } else if (op.item == '=') {
+      //setcurrExpr(currExpr => (eval(currExpr)).toString());
+      try {
+        console.log(eval(currExpr));
+        setcurrExpr(currExpr => (eval(currExpr)).toString());
+        setErrMsg(msg => '');
+      } catch (err) {
+        setErrMsg(msg => 'Invalid syntax.')
+        console.log(err);
+      }
     } else {
-      setExpr(expr => expr + op.item);
+      if('+-/*'.includes(op.item)) {
+        op.item = ' ' + op.item + ' ';
+      }
+      setcurrExpr(currExpr => currExpr + op.item);
     }
-    try {
-    console.log(eval(expr));
-    } catch(err) {
-      console.log(err);
-    }
+  
   }
 
   function renderRowItems(items: any) {
-    return (!!items && items.map((item:any) => 
-      <Pressable key={item} onPress={e => updateCalculation({item})}>
+    return (!!items && items.map((item: any) =>
+      <Pressable key={item} onPress={e => updateCalculation({ item })}>
         <Text style={styles.numberItem}>{item}</Text>
       </Pressable>
-      ))
+    ))
   }
 
-  function renderRow(row: any){
+  function renderRow(row: any) {
     return (
       <View style={styles.btnRow}>
-              {renderRowItems(row)}
-        </View>
+        {renderRowItems(row)}
+      </View>
     )
   }
   return (
     <SafeAreaView style={{}}>
       <View style={styles.calcContainer}>
         <View style={styles.resultArea}>
-          <Text style={styles.calcFont}>{expr} </Text>
+          <Text style={styles.calcFont}>{currExpr} </Text>
+        </View>
+        <View>
+          <Text>{errMsg}</Text>
         </View>
         <View style={styles.btnContainer}>
-          {rows ? rows.map(row => renderRow(row)): null}
+          {rows ? rows.map(row => renderRow(row)) : null}
         </View>
       </View>
     </SafeAreaView>
@@ -94,18 +108,20 @@ const styles = StyleSheet.create({
   calcContainer: {
     flexDirection: 'column',
     padding: 10,
-    borderWidth: 1,
+    borderWidth: 0,
     margin: 5,
     height: '100%',
-   justifyContent: 'space-between'
+    justifyContent: 'space-between'
   },
   resultArea: {
-    backgroundColor: 'lightgrey',
+    //backgroundColor: 'lightgrey',
     //flexBasis: 100,
     borderWidth: 1,
+    borderColor: 'lightgrey',
     borderRadius: 10,
     flexGrow: 1,
-    marginBottom: 10,
+    marginBottom: 5,
+    padding: 5,
   },
   calcFont: {
     fontWeight: "600",
@@ -114,7 +130,7 @@ const styles = StyleSheet.create({
   btnContainer: {
     flexDirection: "column",
     //flexWrap: 'wrap',
-    borderWidth: 1,
+    borderWidth: 0,
     marginBottom: 20
   },
   btnRow: {
