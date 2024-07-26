@@ -20,23 +20,23 @@ function App(): React.JSX.Element {
   const [errMsg, setErrMsg] = useState('');
 
   const [rows, _] = useState([
-    ['='],
-    ['AC', '()', 'del', '+/-'],
-    ['0', '.', '%', '+'],
-    ['1', '2', '3', '-'],
-    ['4', '5', '6', '*'],
-    ['7', '8', '9', '/']
+    [{k: 'equal', v: '='}],
+    [{k: 'ac', v: 'AC'}, {k: 'paren', v: '()'}, {k: 'del', v: 'del'}, {k: 'csign', v: '+/-'}],
+    [{k: 'zero', v: '0'}, {k: 'dot', v: '.'}, {k: 'percent', v: '%'}, {k: 'add', v: '+'}],
+    [{k: 'one', v: '1'}, {k: 'two', v: '2'}, {k: 'three', v: '3'}, {k: 'minus', v: '-'}],
+    [{k: 'four', v: '4'}, {k: 'five', v: '5'}, {k: 'six', v: '6'}, {k: 'multiply', v: 'x'}],
+    [{k: 'seven', v: '7'}, {k: 'eight', v: '8'}, {k: '9', v: '9'}, {k: 'divide', v: '/'}]
   ]);
 
   function updateCalculation(op: any) {
 
-    if (op.item == 'AC') {
+    if (op.item.v == 'AC') {
       setcurrExpr(currExpr => '');
-    } else if (op.item == 'del') {
+    } else if (op.item.v == 'del') {
       setcurrExpr(currExpr => currExpr.substring(0, currExpr.length - 1));
-    } else if (op.item == '+/-') {
+    } else if (op.item.v == '+/-') {
       // Todos:
-    } else if (op.item == '=') {
+    } else if (op.item.v == '=') {
       try {
         setcurrExpr(currExpr => (eval(currExpr)).toString());
         setErrMsg(msg => '');
@@ -46,19 +46,25 @@ function App(): React.JSX.Element {
         setErrMsg(msg => 'Invalid syntax.')
       }
     } else {
-      if ('+-/*'.includes(op.item)) {
-        op.item = ' ' + op.item + ' ';
+      if('x' === op.item.v) {
+        setcurrExpr(currExpr => currExpr + ' ' + '*' + ' ');
+      } else if ('+-/'.includes(op.item.v)) {
+        setcurrExpr(currExpr => currExpr + ' ' + op.item.v + ' ');
+      } else {
+        setcurrExpr(currExpr => currExpr + op.item.v);
       }
-      setcurrExpr(currExpr => currExpr + op.item);
     }
 
   }
 
   function renderRowItems(items: any) {
+    
     return (!!items && items.map((item: any) =>
-      <Pressable key={item} onPress={e => updateCalculation({ item })}>
-        <Text style={styles.numberItem}>{item}</Text>
+      
+      <Pressable key={"calc-" + item.k} onPress={e => updateCalculation({ item })}>
+        <Text  key={"label-" + item} style={styles.numberItem}>{item.v}</Text>
       </Pressable>
+      
     ))
   }
 
@@ -89,14 +95,14 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   sectionContainer: {
     marginTop: 32,
-    paddingHorizontal: 24,
+    paddingHorizontal: 0,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '600',
   },
   sectionDescription: {
-    marginTop: 8,
+    marginTop: 2,
     fontSize: 18,
     fontWeight: '400',
   },
@@ -105,7 +111,7 @@ const styles = StyleSheet.create({
   },
   calcContainer: {
     flexDirection: 'column',
-    padding: 10,
+    padding: 0,
     borderWidth: 0,
     margin: 5,
     height: '100%',
